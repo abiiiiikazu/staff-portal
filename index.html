@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -296,8 +295,8 @@ canvas{max-width:100%;}
     <div class="field"><label>所属店舗</label>
       <select id="ms-store">
         <option value="both">両店舗（責任者）</option>
-        <option value="store1">渋谷店</option>
-        <option value="store2">新宿店</option>
+        <option value="store1">ビックカメラ名古屋駅西店</option>
+        <option value="store2">ビックカメラ名古屋JRゲートタワー店</option>
       </select>
     </div>
     <div class="field"><label>権限</label>
@@ -382,7 +381,7 @@ function defData(){
       {id:3,name:'Galaxy S25+ 販売マニュアル',date:'2025/05/19',url:'https://drive.google.com',icon:'📘',color:'#E6F0FF',isNew:true}
     ],
     store1:{
-      name:'渋谷店',
+      name:'ビックカメラ名古屋駅西店',
       yesterday:{sales:1240000,contracts:23,salesDiff:8.2,contractsDiff:3,target:82},
       totalPt:143.300,workDays:73,productivity:1.963,target:2.000,
       staff:[
@@ -394,7 +393,7 @@ function defData(){
       ]
     },
     store2:{
-      name:'新宿店',
+      name:'ビックカメラ名古屋JRゲートタワー店',
       yesterday:{sales:980000,contracts:17,salesDiff:-2.1,contractsDiff:-2,target:65},
       totalPt:216.800,workDays:116,productivity:1.869,target:2.000,
       staff:[
@@ -771,7 +770,7 @@ function renderAdminLog(){
   var h='<div class="card"><div class="card-title">📋 本日のアクセスログ</div>';
   DATA.accessLog.forEach(function(l){
     var bc=l.store==='store1'?'bs1':l.store==='store2'?'bs2':'badm';
-    var bl=l.store==='store1'?'渋谷':l.store==='store2'?'新宿':'全店';
+    var bl=l.store==='store1'?'駅西店':l.store==='store2'?'JRゲート':'全店';
     h+='<div class="log-item"><div class="log-user"><div class="sdot '+(l.online?'son':'sof')+'"></div>';
     h+='<div><div class="log-name">'+l.name+' <span class="badge '+bc+'">'+bl+'</span></div>';
     h+='<div class="log-detail">最終: '+l.time+' — '+l.page+'</div></div></div>';
@@ -783,7 +782,7 @@ function renderAdminLog(){
     h+='<div class="card"><div class="card-title">⚠️ 本日未アクセス</div>';
     unconfirmed.forEach(function(s){
       var bc=s.store==='store1'?'bs1':s.store==='store2'?'bs2':'badm';
-      var bl=s.store==='store1'?'渋谷':s.store==='store2'?'新宿':'全店';
+      var bl=s.store==='store1'?'駅西店':s.store==='store2'?'JRゲート':'全店';
       h+='<div class="log-item"><div class="log-user"><div class="sdot sof"></div>';
       h+='<div><div class="log-name">'+s.name+' <span class="badge '+bc+'">'+bl+'</span></div>';
       h+='<div class="log-detail">本日未ログイン</div></div></div></div>';
@@ -809,7 +808,7 @@ function renderAdminStaff(){
   var h='<div style="margin-bottom:10px;"><button class="btn-sm btn-primary" id="btn-add-staff">＋ スタッフ追加</button></div><div class="card">';
   DATA.staffList.forEach(function(s){
     var rl=s.role==='admin'?'管理者':s.role==='manager'?'責任者':'スタッフ';
-    var sl=s.store==='both'?'両店舗':s.store==='store1'?'渋谷店':'新宿店';
+    var sl=s.store==='both'?'両店舗':s.store==='store1'?'ビックカメラ名古屋駅西店':'ビックカメラ名古屋JRゲートタワー店';
     var bc=s.store==='store1'?'bs1':s.store==='store2'?'bs2':'badm';
     h+='<div class="log-item"><div><div class="log-name">'+s.name+' <span class="badge '+bc+'">'+sl+'</span></div>';
     h+='<div class="log-detail">ID: '+s.id+' / '+rl+'</div></div>';
@@ -964,7 +963,7 @@ function fetchSheets(){
     DATA.store2.staff=[]; DATA.store2.totalPt=0; DATA.store2.workDays=0;
     rows.forEach(function(r){
       var pt=parseFloat(r[3])||0, wd=parseInt(r[4])||0;
-      var key=r[1]==='渋谷'?'store1':'store2';
+      var key=r[1]==='駅西店'?'store1':'store2';
       DATA[key].totalPt=parseFloat((DATA[key].totalPt+pt).toFixed(3));
       DATA[key].workDays+=wd;
       DATA[key].productivity=DATA[key].workDays>0?parseFloat((DATA[key].totalPt/DATA[key].workDays).toFixed(3)):0;
