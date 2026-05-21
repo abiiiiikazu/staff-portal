@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A1A1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="スタッフポータル">
+<link rel="manifest" id="pwa-manifest">
+<title>スタッフポータル</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --y:#FFD200;--yd:#D4AD00;--bk:#1A1A1A;--wh:#fff;
+  --bg:#F2F4F7;--card:#fff;
+  --g2:#E2E6EC;--g3:#C8CDD6;--mu:#8A94A6;--tx:#1E2432;
+  --gn:#0E9E57;--gn-bg:#E6F8EE;
+  --rd:#D93025;--rd-bg:#FDE8E6;
+  --bl:#1A6FD4;--bl-bg:#E8F0FB;
+  --y-bg:#FFF8D6;
+  --nav-h:54px;
+}
+body{font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;min-height:100vh;}
+
+#login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(160deg,#1A1A1A 60%,#2a2a2a);padding:20px;}
+.login-box{background:var(--wh);border-radius:20px;padding:40px 32px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.18);}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-mark{width:60px;height:60px;background:var(--y);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px;}
+.login-logo h1{font-size:22px;font-weight:700;color:var(--tx);}
+.login-logo p{font-size:12px;color:var(--mu);margin-top:5px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;color:var(--mu);font-weight:600;margin-bottom:6px;letter-spacing:.04em;}
+.field input{width:100%;padding:11px 14px;border:1.5px solid var(--g2);border-radius:10px;font-size:14px;background:#FAFBFC;color:var(--tx);}
+.field input:focus{outline:none;border-color:var(--yd);}
+.field select{width:100%;padding:10px 12px;border:1.5px solid var(--g2);border-radius:10px;font-size:13px;background:#FAFBFC;color:var(--tx);}
+.field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--g2);border-radius:10px;font-size:13px;background:#FAFBFC;color:var(--tx);resize:vertical;line-height:1.7;}
+.btn-login{width:100%;background:var(--y);color:var(--bk);border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+.login-err{color:var(--rd);font-size:12px;text-align:center;margin-top:10px;display:none;background:var(--rd-bg);padding:8px;border-radius:8px;}
+.login-hint{font-size:11px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.7;}
+
+#app{display:none;flex-direction:column;min-height:100vh;max-width:680px;margin:0 auto;background:var(--bg);}
+.topbar{background:var(--bk);color:var(--wh);display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:var(--nav-h);position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-mark{width:32px;height:32px;background:var(--y);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.topbar-title{font-size:15px;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.topbar-user{font-size:12px;color:#aaa;}
+.btn-logout{background:none;border:1px solid #444;color:#bbb;border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;font-size:20px;padding:4px;color:#ccc;}
+.notif-badge{position:absolute;top:0;right:0;width:16px;height:16px;background:var(--rd);border-radius:50%;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;display:none;}
+
+.nav{background:var(--wh);border-bottom:1px solid var(--g2);display:flex;position:sticky;top:var(--nav-h);z-index:99;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.nav-item{flex:1;padding:10px 2px 8px;text-align:center;font-size:11px;color:var(--mu);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.ni-icon{font-size:19px;}
+.nav-item.active{color:var(--bk);border-bottom-color:var(--y);font-weight:700;}
+
+.content{flex:1;padding:14px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+.sec-label{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.1em;text-transform:uppercase;margin:0 0 9px;}
+.card{background:var(--card);border-radius:14px;border:1px solid var(--g2);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.card-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px;color:var(--tx);}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.bnew{background:var(--y);color:#6b4d00;}
+.bwarn{background:var(--rd-bg);color:var(--rd);}
+.bs1{background:#FFF0C0;color:#7a5500;}
+.bs2{background:var(--bl-bg);color:var(--bl);}
+.badm{background:#F0E6FF;color:#6b00b3;}
+.bread{background:var(--gn-bg);color:var(--gn);}
+
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.kpi{background:var(--bg);border-radius:10px;padding:12px 14px;border:1px solid var(--g2);}
+.kpi-label{font-size:10px;color:var(--mu);font-weight:600;letter-spacing:.04em;}
+.kpi-val{font-size:24px;font-weight:700;margin-top:3px;color:var(--tx);}
+.kpi-val span{font-size:12px;font-weight:400;color:var(--mu);}
+.kpi-diff{font-size:11px;margin-top:4px;font-weight:500;}
+.up{color:var(--gn);} .dn{color:var(--rd);}
+
+.prog-row{display:flex;align-items:center;gap:10px;}
+.prog-lbl{font-size:11px;width:70px;flex-shrink:0;color:var(--mu);font-weight:500;}
+.prog-bar{flex:1;height:8px;background:var(--g2);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;background:var(--y);}
+.prog-pct{font-size:12px;font-weight:700;width:36px;text-align:right;color:var(--tx);}
+
+.notice-item{padding:11px 0;border-bottom:1px solid var(--g2);display:flex;gap:10px;align-items:flex-start;cursor:pointer;transition:background .1s;}
+.notice-item:last-child{border-bottom:none;padding-bottom:0;}
+.notice-item:hover{background:#FAFBFF;border-radius:8px;padding-left:4px;}
+.ndot{width:8px;height:8px;border-radius:50%;background:var(--y);margin-top:5px;flex-shrink:0;}
+.ndot.read{background:var(--g3);}
+.n-text{font-size:13px;line-height:1.55;color:var(--tx);}
+.n-text.read{color:var(--mu);}
+.nmeta{font-size:11px;color:var(--mu);margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.n-body{font-size:12px;color:var(--mu);margin-top:6px;line-height:1.6;padding:8px 10px;background:var(--bg);border-radius:8px;display:none;}
+.n-body.open{display:block;}
+
+/* RESULTS */
+.rh{background:var(--bk);border-radius:14px;margin-bottom:14px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.rh-cell{padding:16px 12px;border-right:1px solid #2e2e2e;}
+.rh-cell:last-child{border-right:none;}
+.rh-lbl{font-size:10px;color:#8AACCC;letter-spacing:.05em;margin-bottom:10px;font-weight:600;}
+.rh-val{font-size:18px;font-weight:700;color:#EEF4FF;}
+.rh-sub{font-size:10px;color:#607A9A;margin-top:5px;}
+.dtable-wrap{background:var(--wh);border-radius:14px;margin-bottom:14px;overflow:hidden;border:1px solid var(--g2);box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.dtable{width:100%;border-collapse:collapse;}
+.dtable thead{background:#F7F9FC;}
+.dtable th{padding:9px 10px;font-size:10px;font-weight:700;color:var(--mu);border-bottom:1px solid var(--g2);text-align:right;letter-spacing:.04em;}
+.dtable th.tl{text-align:left;}
+.dtable td{padding:10px 10px;font-size:12px;color:var(--tx);border-bottom:1px solid #F0F2F6;text-align:right;}
+.dtable td.tl{text-align:left;font-weight:600;}
+.dtable td.tc{text-align:center;}
+.dtable td.mu{color:var(--mu);font-weight:400;}
+.dtable tr:last-child td{border-bottom:none;}
+.dtable tr:hover td{background:#FAFBFF;}
+.rank-num{color:var(--mu);font-weight:700;font-size:13px;}
+.rank-num.top{color:var(--yd);font-size:15px;}
+.sok{background:var(--gn-bg);color:var(--gn);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;}
+.sno{background:var(--rd-bg);color:var(--rd);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;}
+
+/* CHART */
+.chart-wrap{background:var(--wh);border-radius:14px;border:1px solid var(--g2);padding:16px;margin-bottom:14px;}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--tx);}
+.chart-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.chart-tab{padding:5px 12px;border-radius:20px;border:1px solid var(--g2);font-size:11px;font-weight:600;cursor:pointer;background:var(--bg);color:var(--mu);}
+.chart-tab.active{background:var(--bk);color:var(--wh);border-color:var(--bk);}
+canvas{max-width:100%;}
+
+.doc-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--g2);}
+.doc-item:last-child{border-bottom:none;padding-bottom:0;}
+.doc-info{display:flex;align-items:center;gap:12px;}
+.doc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.doc-name{font-size:13px;font-weight:600;}
+.doc-date{font-size:11px;color:var(--mu);margin-top:3px;}
+.btn-open{background:var(--bk);color:var(--wh);border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap;}
+
+.adm-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.adm-tab{padding:7px 14px;border-radius:20px;border:1.5px solid var(--g2);font-size:12px;font-weight:600;cursor:pointer;background:var(--wh);color:var(--mu);}
+.adm-tab.active{background:var(--bk);color:var(--wh);border-color:var(--bk);}
+.log-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--g2);font-size:12px;}
+.log-item:last-child{border-bottom:none;}
+.log-user{display:flex;align-items:center;gap:10px;}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.son{background:var(--gn);} .sof{background:var(--g3);}
+.log-name{font-size:13px;font-weight:600;}
+.log-detail{font-size:11px;color:var(--mu);margin-top:3px;}
+.btn-sm{background:var(--bg);border:1px solid var(--g2);border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:500;}
+.btn-sm:hover{background:var(--g2);}
+.btn-danger{background:var(--rd-bg);border-color:#F5C0BB;color:var(--rd);}
+.btn-primary{background:var(--y);border-color:var(--yd);color:#6b4d00;font-weight:700;}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--wh);border-radius:18px;padding:24px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.16);}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:18px;}
+.modal-btns{display:flex;gap:10px;margin-top:18px;}
+.modal-btns button{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;}
+.mcancel{background:var(--bg);}
+.msave{background:var(--y);color:#6b4d00;font-weight:700;}
+
+/* NOTIFICATION TOAST */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--bk);color:var(--wh);padding:12px 20px;border-radius:12px;font-size:13px;font-weight:500;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%;text-align:center;border-left:4px solid var(--y);}
+.toast.show{opacity:1;}
+
+/* NOTIF PANEL */
+.notif-panel{position:fixed;top:var(--nav-h);right:0;width:300px;max-height:400px;background:var(--wh);border-radius:0 0 0 14px;box-shadow:-4px 4px 20px rgba(0,0,0,.15);z-index:150;display:none;overflow-y:auto;border:1px solid var(--g2);}
+.notif-panel.open{display:block;}
+.notif-header{padding:12px 16px;border-bottom:1px solid var(--g2);font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+.notif-item{padding:10px 16px;border-bottom:1px solid var(--g2);cursor:pointer;}
+.notif-item:hover{background:var(--bg);}
+.notif-item:last-child{border-bottom:none;}
+.notif-item-title{font-size:12px;font-weight:600;}
+.notif-item-sub{font-size:11px;color:var(--mu);margin-top:2px;}
+.notif-item.unread{border-left:3px solid var(--y);}
+.notif-empty{padding:20px;text-align:center;font-size:12px;color:var(--mu);}
+
+/* PWA install banner */
+.pwa-banner{background:var(--bk);color:var(--wh);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12px;display:none;}
+.pwa-banner.show{display:flex;}
+.pwa-banner button{background:var(--y);color:var(--bk);border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;}
+.pwa-close{background:none;border:none;color:#888;cursor:pointer;font-size:16px;padding:0 4px;}
+</style>
+</head>
+<body>
+
+<div id="pwa-banner" class="pwa-banner">
+  <span>📱 ホーム画面に追加してアプリとして使えます</span>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button id="pwa-install">追加する</button>
+    <button class="pwa-close" id="pwa-close">✕</button>
+  </div>
+</div>
+
+<div id="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-mark">🏪</div>
+      <h1>スタッフポータル</h1>
+      <p>スタッフIDとパスワードでログイン</p>
+    </div>
+    <div class="field"><label>スタッフID</label><input type="text" id="lid" placeholder="例: staff001" autocomplete="username"></div>
+    <div class="field"><label>パスワード</label><input type="password" id="lpw" placeholder="パスワードを入力" autocomplete="current-password"></div>
+    <button class="btn-login" id="btn-login">ログイン</button>
+    <p class="login-err" id="login-err">IDまたはパスワードが違います</p>
+    <p class="login-hint">ログイン情報は管理者にお問い合わせください</p>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-mark">🏪</div>
+      <span class="topbar-title">スタッフポータル</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbar-name"></span>
+      <button class="notif-btn" id="notif-btn" title="通知">🔔<span class="notif-badge" id="notif-badge"></span></button>
+      <button class="btn-logout" id="btn-logout">ログアウト</button>
+    </div>
+  </div>
+
+  <!-- 通知パネル -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-header">
+      <span>🔔 通知</span>
+      <button class="btn-sm" id="notif-readall" style="font-size:10px;padding:3px 8px;">全て既読</button>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+
+  <div class="nav" id="main-nav">
+    <div class="nav-item active" id="nav-home"><span class="ni-icon">🏠</span>ホーム</div>
+    <div class="nav-item" id="nav-results"><span class="ni-icon">📊</span>実績</div>
+    <div class="nav-item" id="nav-docs"><span class="ni-icon">📁</span>資料</div>
+    <div class="nav-item" id="nav-manual"><span class="ni-icon">📖</span>マニュアル</div>
+    <div class="nav-item" id="nav-admin" style="display:none;"><span class="ni-icon">🛡️</span>管理者</div>
+  </div>
+
+  <div class="content">
+    <div class="screen active" id="screen-home">
+      <p class="sec-label">📢 お知らせ</p>
+      <div class="card" id="home-notices"></div>
+      <p class="sec-label">昨日の店舗実績</p>
+      <div id="home-results"></div>
+    </div>
+
+    <div class="screen" id="screen-results">
+      <div id="results-content"></div>
+      <div class="chart-wrap" id="chart-wrap">
+        <div class="chart-title">📈 週別生産性推移</div>
+        <div class="chart-tabs">
+          <button class="chart-tab active" data-chart="productivity">生産性</button>
+          <button class="chart-tab" data-chart="pt">累計Pt</button>
+          <button class="chart-tab" data-chart="workdays">稼働日数</button>
+        </div>
+        <canvas id="results-chart" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-docs">
+      <p class="sec-label">📁 資料 — Googleドライブ連動</p>
+      <div class="card" id="docs-list"></div>
+    </div>
+
+    <div class="screen" id="screen-manual">
+      <p class="sec-label">📖 マニュアル — Googleドライブ連動</p>
+      <div class="card" id="manual-list"></div>
+    </div>
+
+    <div class="screen" id="screen-admin">
+      <div class="adm-tabs">
+        <button class="adm-tab active" id="atab-log">閲覧ログ</button>
+        <button class="adm-tab" id="atab-staff">スタッフ管理</button>
+        <button class="adm-tab" id="atab-notice">お知らせ管理</button>
+        <button class="adm-tab" id="atab-sheets">Sheets設定</button>
+      </div>
+      <div id="apanel-log"></div>
+      <div id="apanel-staff" style="display:none;"></div>
+      <div id="apanel-notice" style="display:none;"></div>
+      <div id="apanel-sheets" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL スタッフ -->
+<div class="modal-bg" id="modal-staff">
+  <div class="modal">
+    <h3 id="ms-title">スタッフ追加</h3>
+    <div class="field"><label>スタッフID</label><input type="text" id="ms-id" placeholder="staff001"></div>
+    <div class="field"><label>名前</label><input type="text" id="ms-name" placeholder="田中 花子"></div>
+    <div class="field"><label>パスワード</label><input type="password" id="ms-pw"></div>
+    <div class="field"><label>所属店舗</label>
+      <select id="ms-store">
+        <option value="both">両店舗（責任者）</option>
+        <option value="store1">渋谷店</option>
+        <option value="store2">新宿店</option>
+      </select>
+    </div>
+    <div class="field"><label>権限</label>
+      <select id="ms-role">
+        <option value="staff">スタッフ</option>
+        <option value="manager">責任者</option>
+        <option value="admin">管理者</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="mcancel" id="ms-cancel">キャンセル</button>
+      <button class="msave" id="ms-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL お知らせ -->
+<div class="modal-bg" id="modal-notice">
+  <div class="modal">
+    <h3 id="mn-title">お知らせ追加</h3>
+    <div class="field"><label>タイトル</label><input type="text" id="mn-ttl" placeholder="タイトル"></div>
+    <div class="field"><label>内容</label><textarea id="mn-body" rows="5" placeholder="詳細内容"></textarea></div>
+    <div class="field"><label>重要度</label>
+      <select id="mn-pri">
+        <option value="normal">通常</option>
+        <option value="high">重要（要確認）</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="mcancel" id="mn-cancel">キャンセル</button>
+      <button class="msave" id="mn-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Sheets -->
+<div class="modal-bg" id="modal-sheets">
+  <div class="modal">
+    <h3>Google Sheets設定</h3>
+    <div class="field"><label>スプレッドシートID</label><input type="text" id="sh-id" placeholder="1BxiMVs0XRA5nFMd..."></div>
+    <div class="field"><label>APIキー</label><input type="text" id="sh-key" placeholder="AIzaSy..."></div>
+    <div class="field"><label>シート名</label><input type="text" id="sh-sheet" placeholder="実績データ"></div>
+    <div class="modal-btns">
+      <button class="mcancel" id="sh-cancel">キャンセル</button>
+      <button class="msave" id="sh-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+
+var SK = 'portal_v3';
+var DATA, CU, editStaffId, editNoticeId, chartInst = null, currentChartType = 'productivity';
+var deferredPrompt = null;
+
+function defData(){
+  var today = todayStr();
+  return {
+    staffList:[
+      {id:'admin',name:'管理者',pw:'admin123',store:'both',role:'admin'},
+      {id:'staff001',name:'田中 花子',pw:'tanaka1',store:'store1',role:'manager'},
+      {id:'staff002',name:'山田 太郎',pw:'yamada1',store:'store1',role:'staff'},
+      {id:'staff003',name:'鈴木 一郎',pw:'suzuki1',store:'store1',role:'staff'},
+      {id:'staff004',name:'佐藤 健',pw:'sato1',store:'store2',role:'manager'},
+      {id:'staff005',name:'高橋 美咲',pw:'takahashi1',store:'store2',role:'staff'}
+    ],
+    notices:[
+      {id:1,title:'【必須確認】6月シフト提出期限は5/25（日）まで',body:'必ず期日内に提出してください。遅れる場合は責任者に連絡。',priority:'high',date:'2025/05/20'},
+      {id:2,title:'新商品「Galaxy S25+」販売マニュアル公開',body:'マニュアルタブより確認してください。',priority:'normal',date:'2025/05/19'},
+      {id:3,title:'4月度優秀スタッフ表彰結果を掲載',body:'詳細は資料タブをご確認ください。',priority:'normal',date:'2025/05/15'}
+    ],
+    docs:[
+      {id:1,name:'5月度 売上目標シート',date:'2025/05/18',url:'https://drive.google.com',icon:'📊',color:'#FFF3CC'},
+      {id:2,name:'スタッフ研修資料 2025年版',date:'2025/04/30',url:'https://drive.google.com',icon:'📑',color:'#E6F0FF'},
+      {id:3,name:'クレーム対応フロー',date:'2025/03/10',url:'https://drive.google.com',icon:'📄',color:'#E8F5E9'}
+    ],
+    manuals:[
+      {id:1,name:'契約手続き マニュアル',date:'2025/05/01',url:'https://drive.google.com',icon:'📕',color:'#FFE0E0'},
+      {id:2,name:'POS操作マニュアル',date:'2025/02/14',url:'https://drive.google.com',icon:'📗',color:'#E8F5E9'},
+      {id:3,name:'Galaxy S25+ 販売マニュアル',date:'2025/05/19',url:'https://drive.google.com',icon:'📘',color:'#E6F0FF',isNew:true}
+    ],
+    store1:{
+      name:'渋谷店',
+      yesterday:{sales:1240000,contracts:23,salesDiff:8.2,contractsDiff:3,target:82},
+      totalPt:143.300,workDays:73,productivity:1.963,target:2.000,
+      staff:[
+        {name:'田中 花子',pt:30.325,workDays:9,productivity:3.369,target:2.0},
+        {name:'山田 太郎',pt:25.825,workDays:13,productivity:1.987,target:2.0},
+        {name:'鈴木 一郎',pt:23.525,workDays:12,productivity:1.960,target:2.0},
+        {name:'高田 実',pt:19.750,workDays:12,productivity:1.646,target:2.0},
+        {name:'中村 希',pt:15.700,workDays:10,productivity:1.570,target:2.0}
+      ]
+    },
+    store2:{
+      name:'新宿店',
+      yesterday:{sales:980000,contracts:17,salesDiff:-2.1,contractsDiff:-2,target:65},
+      totalPt:216.800,workDays:116,productivity:1.869,target:2.000,
+      staff:[
+        {name:'佐藤 健',pt:46.650,workDays:14,productivity:3.332,target:2.0},
+        {name:'高橋 美咲',pt:32.300,workDays:13,productivity:2.485,target:2.0},
+        {name:'加藤 三四郎',pt:29.525,workDays:12,productivity:2.460,target:2.0},
+        {name:'李 石峰',pt:28.025,workDays:13,productivity:2.156,target:2.0},
+        {name:'宇佐見 悠世',pt:26.525,workDays:13,productivity:2.040,target:2.0},
+        {name:'豊田 夢々',pt:23.675,workDays:13,productivity:1.821,target:2.0},
+        {name:'神田 つくし',pt:20.450,workDays:13,productivity:1.573,target:2.0},
+        {name:'川上 柊雅',pt:14.950,workDays:10,productivity:1.495,target:2.0},
+        {name:'斎藤 亜美',pt:7.650,workDays:7,productivity:1.093,target:2.0},
+        {name:'富樫 幸輝',pt:7.450,workDays:12,productivity:0.621,target:2.0}
+      ]
+    },
+    weeklyData:[
+      {week:'第1週',store1:{productivity:1.82,pt:32.0,workDays:18},store2:{productivity:1.75,pt:48.0,workDays:27}},
+      {week:'第2週',store1:{productivity:1.91,pt:35.5,workDays:19},store2:{productivity:1.85,pt:52.0,workDays:28}},
+      {week:'第3週',store1:{productivity:2.01,pt:38.2,workDays:19},store2:{productivity:1.92,pt:58.0,workDays:30}},
+      {week:'第4週',store1:{productivity:1.96,pt:37.6,workDays:17},store2:{productivity:1.87,pt:58.8,workDays:31}}
+    ],
+    readNotices:{},
+    accessLog:[],
+    sheetsConfig:{id:'',key:'',sheet:'実績データ'},
+    noticeCounter:4,
+    notifHistory:[]
+  };
+}
+
+function load(){ try{ return JSON.parse(localStorage.getItem(SK)) || defData(); }catch(e){ return defData(); } }
+function save(){ localStorage.setItem(SK, JSON.stringify(DATA)); }
+function fmt(n){ return Number(n).toLocaleString('ja-JP'); }
+function fmtPt(n){ return Number(n).toFixed(3); }
+function todayStr(){ var d=new Date(); return d.getFullYear()+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0'); }
+function nowTime(){ var d=new Date(); return d.getHours()+':'+d.getMinutes().toString().padStart(2,'0'); }
+function monthLabel(){ var d=new Date(); return d.getFullYear()+'/'+(d.getMonth()+1).toString().padStart(2,'0'); }
+function homeStores(){
+  if(!CU) return [];
+  if(CU.store==='store1') return [DATA.store1];
+  if(CU.store==='store2') return [DATA.store2];
+  return [DATA.store1, DATA.store2];
+}
+function findLog(id){ for(var i=0;i<DATA.accessLog.length;i++){ if(DATA.accessLog[i].staffId===id) return DATA.accessLog[i]; } return null; }
+
+// ── TOAST ──
+function showToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },3000); }
+
+// ── PWA ──
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('pwa-banner').classList.add('show');
+});
+document.getElementById('pwa-install').addEventListener('click', function(){
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(){ deferredPrompt=null; document.getElementById('pwa-banner').classList.remove('show'); }); }
+});
+document.getElementById('pwa-close').addEventListener('click', function(){ document.getElementById('pwa-banner').classList.remove('show'); });
+
+// PWA manifest生成
+var manifest = {name:'スタッフポータル',short_name:'ポータル',start_url:'./',display:'standalone',background_color:'#1A1A1A',theme_color:'#1A1A1A',icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="24" fill="%23FFD200"/><text y="130" x="30" font-size="120">🏪</text></svg>',sizes:'192x192',type:'image/svg+xml'}]};
+var blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+
+// ── NOTIFICATIONS ──
+function getUnreadCount(){
+  if(!CU) return 0;
+  var key = CU.id;
+  var read = DATA.readNotices[key] || {};
+  return DATA.notices.filter(function(n){ return !read[n.id]; }).length;
+}
+function updateNotifBadge(){
+  var count = getUnreadCount();
+  var badge = document.getElementById('notif-badge');
+  if(count > 0){ badge.textContent = count > 9 ? '9+' : count; badge.style.display='flex'; }
+  else { badge.style.display='none'; }
+}
+function renderNotifPanel(){
+  if(!CU) return;
+  var key = CU.id;
+  var read = DATA.readNotices[key] || {};
+  var h = '';
+  DATA.notices.forEach(function(n){
+    var isRead = !!read[n.id];
+    h += '<div class="notif-item'+(isRead?'':' unread')+'" data-nid="'+n.id+'">';
+    h += '<div class="notif-item-title">'+(isRead?'':'')+n.title+'</div>';
+    h += '<div class="notif-item-sub">'+n.date+(n.priority==='high'?' ⚠️ 要確認':'')+'</div>';
+    h += '</div>';
+  });
+  if(!DATA.notices.length) h = '<div class="notif-empty">お知らせはありません</div>';
+  document.getElementById('notif-list').innerHTML = h;
+  document.querySelectorAll('.notif-item').forEach(function(el){
+    el.addEventListener('click', function(){
+      var nid = Number(this.getAttribute('data-nid'));
+      if(!DATA.readNotices[key]) DATA.readNotices[key] = {};
+      DATA.readNotices[key][nid] = true;
+      save(); updateNotifBadge(); renderNotifPanel(); renderHome();
+      document.getElementById('notif-panel').classList.remove('open');
+      showScreen('home');
+    });
+  });
+}
+document.getElementById('notif-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  var panel = document.getElementById('notif-panel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')) renderNotifPanel();
+});
+document.getElementById('notif-readall').addEventListener('click', function(){
+  if(!CU) return;
+  var key = CU.id;
+  if(!DATA.readNotices[key]) DATA.readNotices[key] = {};
+  DATA.notices.forEach(function(n){ DATA.readNotices[key][n.id] = true; });
+  save(); updateNotifBadge(); renderNotifPanel(); renderHome();
+  showToast('全て既読にしました');
+});
+document.addEventListener('click', function(){ document.getElementById('notif-panel').classList.remove('open'); });
+
+// ── BROWSER PUSH NOTIFICATION ──
+function requestPushPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'default'){
+    Notification.requestPermission().then(function(p){
+      if(p==='granted') showToast('🔔 プッシュ通知が有効になりました');
+    });
+  }
+}
+function sendPushNotification(title, body){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  new Notification(title, {body: body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="%23FFD200"/><text y="48" x="8" font-size="48">🏪</text></svg>'});
+}
+function checkNewNotices(){
+  if(!CU) return;
+  var key = CU.id;
+  var read = DATA.readNotices[key] || {};
+  var unread = DATA.notices.filter(function(n){ return !read[n.id] && n.priority==='high'; });
+  if(unread.length > 0){
+    sendPushNotification('スタッフポータル', '未確認の重要お知らせが'+unread.length+'件あります');
+  }
+}
+
+// ── LOGIN ──
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.addEventListener('keydown', function(e){ if(e.key==='Enter' && document.getElementById('login-wrap').style.display!=='none') doLogin(); });
+
+function doLogin(){
+  var id=document.getElementById('lid').value.trim();
+  var pw=document.getElementById('lpw').value;
+  var staff=null;
+  for(var i=0;i<DATA.staffList.length;i++){ if(DATA.staffList[i].id===id && DATA.staffList[i].pw===pw){ staff=DATA.staffList[i]; break; } }
+  if(!staff){ document.getElementById('login-err').style.display='block'; return; }
+  document.getElementById('login-err').style.display='none';
+  CU=staff;
+  var log=findLog(staff.id);
+  if(log){ log.time=nowTime(); log.online=true; log.page='ログイン'; }
+  else { DATA.accessLog.unshift({staffId:staff.id,name:staff.name,store:staff.store,time:nowTime(),page:'ログイン',online:true}); }
+  save();
+  document.getElementById('login-wrap').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('topbar-name').textContent=staff.name;
+  if(staff.role==='admin'||staff.role==='manager') document.getElementById('nav-admin').style.display='flex';
+  renderAll();
+  showScreen('home');
+  updateNotifBadge();
+  requestPushPermission();
+  setTimeout(function(){ checkNewNotices(); }, 1000);
+  showToast('ようこそ、'+staff.name+'さん！');
+}
+
+document.getElementById('btn-logout').addEventListener('click', function(){
+  if(CU){ var l=findLog(CU.id); if(l){ l.online=false; save(); } }
+  CU=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-wrap').style.display='flex';
+  document.getElementById('lid').value='';
+  document.getElementById('lpw').value='';
+  document.getElementById('nav-admin').style.display='none';
+  if(chartInst){ chartInst.destroy(); chartInst=null; }
+});
+
+// ── NAV ──
+var SCREENS=['home','results','docs','manual','admin'];
+SCREENS.forEach(function(s){
+  document.getElementById('nav-'+s).addEventListener('click', function(){ showScreen(s); });
+});
+function showScreen(id){
+  SCREENS.forEach(function(s){
+    document.getElementById('screen-'+s).classList.remove('active');
+    document.getElementById('nav-'+s).classList.remove('active');
+  });
+  document.getElementById('screen-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  if(CU){ var l=findLog(CU.id); if(l){ var lb={home:'ホーム',results:'実績',docs:'資料',manual:'マニュアル',admin:'管理者'}; l.page=lb[id]||id; l.time=nowTime(); } save(); }
+  if(id==='admin') renderAdmin();
+  if(id==='results') setTimeout(renderChart, 100);
+}
+
+// ── HOME ──
+function renderHome(){
+  if(!CU) return;
+  var key=CU.id;
+  var read=DATA.readNotices[key]||{};
+  var unread=DATA.notices.filter(function(n){ return !read[n.id]; });
+  var h='<div class="card-title">🔔 更新情報 ';
+  if(unread.length) h+='<span class="badge bnew">'+unread.length+'件</span>';
+  h+='</div>';
+  DATA.notices.forEach(function(n){
+    var isRead=!!read[n.id];
+    h+='<div class="notice-item" data-nid="'+n.id+'">';
+    h+='<div class="ndot'+(isRead?' read':'')+'"></div>';
+    h+='<div style="flex:1;">';
+    h+='<div class="n-text'+(isRead?' read':'')+'">'+n.title;
+    if(!isRead) h+=' <span class="badge bnew" style="font-size:9px;">NEW</span>';
+    h+='</div>';
+    h+='<div class="nmeta"><span>'+n.date+'</span>';
+    if(n.priority==='high'&&!isRead) h+='<span class="badge bwarn">要確認</span>';
+    if(isRead) h+='<span class="badge bread">確認済み</span>';
+    h+='</div>';
+    if(n.body) h+='<div class="n-body" id="nb-'+n.id+'">'+n.body+'</div>';
+    h+='</div></div>';
+  });
+  document.getElementById('home-notices').innerHTML=h;
+  document.querySelectorAll('.notice-item').forEach(function(el){
+    el.addEventListener('click', function(){
+      var nid=Number(this.getAttribute('data-nid'));
+      if(!DATA.readNotices[key]) DATA.readNotices[key]={};
+      DATA.readNotices[key][nid]=true;
+      var body=document.getElementById('nb-'+nid);
+      if(body) body.classList.toggle('open');
+      save(); updateNotifBadge(); renderHome();
+    });
+  });
+
+  var stores=homeStores();
+  var r='';
+  stores.forEach(function(s){
+    var d=s.yesterday;
+    var diffS=d.salesDiff>=0?'<span class="up">↑ +'+d.salesDiff+'% vs先週</span>':'<span class="dn">↓ '+d.salesDiff+'% vs先週</span>';
+    var diffC=d.contractsDiff>=0?'<span class="up">↑ +'+d.contractsDiff+'件</span>':'<span class="dn">↓ '+d.contractsDiff+'件</span>';
+    r+='<div class="card"><div class="card-title">🏆 '+s.name+'</div>';
+    r+='<div class="kpi-grid">';
+    r+='<div class="kpi"><div class="kpi-label">売上</div><div class="kpi-val">¥'+fmt(d.sales)+'</div><div class="kpi-diff">'+diffS+'</div></div>';
+    r+='<div class="kpi"><div class="kpi-label">契約数</div><div class="kpi-val">'+d.contracts+'<span>件</span></div><div class="kpi-diff">'+diffC+'</div></div>';
+    r+='</div>';
+    r+='<div class="prog-row"><div class="prog-lbl">目標達成率</div><div class="prog-bar"><div class="prog-fill" style="width:'+d.target+'%"></div></div><div class="prog-pct">'+d.target+'%</div></div>';
+    r+='</div>';
+  });
+  document.getElementById('home-results').innerHTML=r;
+}
+
+// ── RESULTS ──
+function renderResults(){
+  var stores=[DATA.store1,DATA.store2];
+  var allStaff=[];
+  stores.forEach(function(s){ s.staff.forEach(function(st){ allStaff.push({name:st.name,pt:st.pt,workDays:st.workDays,productivity:st.productivity,target:st.target,storeName:s.name}); }); });
+  var totalPt=stores.reduce(function(a,s){ return a+s.totalPt; },0);
+  var totalDays=allStaff.reduce(function(a,st){ return a+st.workDays; },0);
+  var totalProd=totalDays>0?(totalPt/totalDays).toFixed(3):'-';
+  var ml=monthLabel();
+
+  var h='';
+  h+='<div class="rh">';
+  h+='<div class="rh-cell"><div class="rh-lbl">対象月</div><div class="rh-val">'+ml+'</div><div class="rh-sub">対象月</div></div>';
+  h+='<div class="rh-cell"><div class="rh-lbl">全体Pt</div><div class="rh-val">'+totalPt.toFixed(3)+'</div><div class="rh-sub">累計Pt</div></div>';
+  h+='<div class="rh-cell"><div class="rh-lbl">全体稼働数</div><div class="rh-val">'+totalDays+'</div><div class="rh-sub">延べ稼働数</div></div>';
+  h+='<div class="rh-cell"><div class="rh-lbl">全体生産性</div><div class="rh-val">'+totalProd+'</div><div class="rh-sub">Pt/日</div></div>';
+  h+='</div>';
+
+  h+='<p class="sec-label" style="margin-top:4px;">🏪 店舗別生産性</p>';
+  h+='<div class="dtable-wrap"><table class="dtable">';
+  h+='<thead><tr><th class="tl">店舗</th><th>累計Pt</th><th>稼働日数</th><th>生産性</th><th>目標</th><th>達成状況</th></tr></thead><tbody>';
+  stores.forEach(function(s){
+    var ok=s.productivity>=s.target;
+    h+='<tr><td class="tl">'+s.name+'</td><td>'+fmtPt(s.totalPt)+'</td><td>'+s.workDays+'</td><td>'+fmtPt(s.productivity)+'</td><td>'+fmtPt(s.target)+'</td>';
+    h+='<td class="tc"><span class="'+(ok?'sok':'sno')+'">'+(ok?'達成':'未達')+'</span></td></tr>';
+  });
+  h+='</tbody></table></div>';
+
+  allStaff.sort(function(a,b){ return b.productivity-a.productivity; });
+  h+='<p class="sec-label" style="margin-top:4px;">👤 個人別ランキング</p>';
+  h+='<div class="dtable-wrap"><table class="dtable">';
+  h+='<thead><tr><th>順位</th><th class="tl">名前</th><th class="tl">店舗</th><th>累計Pt</th><th>稼働日数</th><th>生産性</th><th>達成状況</th></tr></thead><tbody>';
+  allStaff.forEach(function(st,i){
+    var ok=st.productivity>=st.target;
+    var isTop=i<3;
+    var sc=st.storeName===DATA.store1.name?'#7a5500':'var(--bl)';
+    h+='<tr>';
+    h+='<td class="tc"><span class="rank-num'+(isTop?' top':'')+'"> '+(i+1)+'</span></td>';
+    h+='<td class="tl">'+st.name+'</td>';
+    h+='<td class="tl mu" style="color:'+sc+';">'+st.storeName+'</td>';
+    h+='<td>'+fmtPt(st.pt)+'</td>';
+    h+='<td>'+st.workDays+'</td>';
+    h+='<td style="font-weight:700;">'+fmtPt(st.productivity)+'</td>';
+    h+='<td class="tc"><span class="'+(ok?'sok':'sno')+'">'+(ok?'達成':'未達')+'</span></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  document.getElementById('results-content').innerHTML=h;
+}
+
+// ── CHART ──
+function renderChart(){
+  var weekly=DATA.weeklyData||[];
+  if(!weekly.length) return;
+  var labels=weekly.map(function(w){ return w.week; });
+  var s1data=weekly.map(function(w){ return w.store1[currentChartType]; });
+  var s2data=weekly.map(function(w){ return w.store2[currentChartType]; });
+
+  var typeLabels={productivity:'生産性（Pt/日）',pt:'累計Pt',workdays:'稼働日数'};
+  var canvas=document.getElementById('results-chart');
+  if(!canvas) return;
+  if(chartInst){ chartInst.destroy(); chartInst=null; }
+  chartInst=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels:labels,
+      datasets:[
+        {label:DATA.store1.name,data:s1data,borderColor:'#D4AD00',backgroundColor:'rgba(212,173,0,0.1)',tension:0.4,pointBackgroundColor:'#D4AD00',pointRadius:5,borderWidth:2.5},
+        {label:DATA.store2.name,data:s2data,borderColor:'#1A6FD4',backgroundColor:'rgba(26,111,212,0.1)',tension:0.4,pointBackgroundColor:'#1A6FD4',pointRadius:5,borderWidth:2.5}
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{position:'bottom',labels:{font:{size:12},padding:16}},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        y:{beginAtZero:false,grid:{color:'#F0F2F6'},ticks:{font:{size:11}},title:{display:true,text:typeLabels[currentChartType],font:{size:11}}},
+        x:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
+  });
+}
+
+document.querySelectorAll('.chart-tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.chart-tab').forEach(function(b){ b.classList.remove('active'); });
+    this.classList.add('active');
+    currentChartType=this.getAttribute('data-chart');
+    renderChart();
+  });
+});
+
+// ── DOCS / MANUAL ──
+function renderDocs(){
+  var h='';
+  DATA.docs.forEach(function(d){
+    h+='<div class="doc-item"><div class="doc-info"><div class="doc-icon" style="background:'+d.color+'">'+d.icon+'</div>';
+    h+='<div><div class="doc-name">'+d.name+'</div><div class="doc-date">更新: '+d.date+'</div></div></div>';
+    h+='<a class="btn-open" href="'+d.url+'" target="_blank">🔗 開く</a></div>';
+  });
+  document.getElementById('docs-list').innerHTML=h;
+}
+function renderManual(){
+  var h='';
+  DATA.manuals.forEach(function(m){
+    h+='<div class="doc-item"><div class="doc-info"><div class="doc-icon" style="background:'+m.color+'">'+m.icon+'</div>';
+    h+='<div><div class="doc-name">'+m.name+(m.isNew?' <span class="badge bnew">NEW</span>':'')+'</div><div class="doc-date">更新: '+m.date+'</div></div></div>';
+    h+='<a class="btn-open" href="'+m.url+'" target="_blank">🔗 開く</a></div>';
+  });
+  document.getElementById('manual-list').innerHTML=h;
+}
+
+// ── ADMIN ──
+var adminPanels=['log','staff','notice','sheets'];
+adminPanels.forEach(function(p){
+  document.getElementById('atab-'+p).addEventListener('click', function(){
+    adminPanels.forEach(function(x){ document.getElementById('atab-'+x).classList.remove('active'); document.getElementById('apanel-'+x).style.display='none'; });
+    document.getElementById('atab-'+p).classList.add('active');
+    document.getElementById('apanel-'+p).style.display='block';
+  });
+});
+function renderAdmin(){ renderAdminLog(); renderAdminStaff(); renderAdminNotice(); renderAdminSheets(); }
+
+function renderAdminLog(){
+  var unread=DATA.notices.filter(function(n){ return n.priority==='high'; });
+  var unconfirmed=DATA.staffList.filter(function(s){ return s.role!=='admin'&&!findLog(s.id); });
+  var h='<div class="card"><div class="card-title">📋 本日のアクセスログ</div>';
+  DATA.accessLog.forEach(function(l){
+    var bc=l.store==='store1'?'bs1':l.store==='store2'?'bs2':'badm';
+    var bl=l.store==='store1'?'渋谷':l.store==='store2'?'新宿':'全店';
+    h+='<div class="log-item"><div class="log-user"><div class="sdot '+(l.online?'son':'sof')+'"></div>';
+    h+='<div><div class="log-name">'+l.name+' <span class="badge '+bc+'">'+bl+'</span></div>';
+    h+='<div class="log-detail">最終: '+l.time+' — '+l.page+'</div></div></div>';
+    h+='<span style="font-size:11px;font-weight:600;color:'+(l.online?'var(--gn)':'var(--mu)')+';">'+(l.online?'🟢 オンライン':'⚫ オフライン')+'</span></div>';
+  });
+  if(!DATA.accessLog.length) h+='<div style="font-size:12px;color:var(--mu);padding:8px 0;">まだログインしたスタッフはいません</div>';
+  h+='</div>';
+  if(unconfirmed.length){
+    h+='<div class="card"><div class="card-title">⚠️ 本日未アクセス</div>';
+    unconfirmed.forEach(function(s){
+      var bc=s.store==='store1'?'bs1':s.store==='store2'?'bs2':'badm';
+      var bl=s.store==='store1'?'渋谷':s.store==='store2'?'新宿':'全店';
+      h+='<div class="log-item"><div class="log-user"><div class="sdot sof"></div>';
+      h+='<div><div class="log-name">'+s.name+' <span class="badge '+bc+'">'+bl+'</span></div>';
+      h+='<div class="log-detail">本日未ログイン</div></div></div></div>';
+    });
+    h+='</div>';
+  }
+  if(unread.length){
+    h+='<div class="card"><div class="card-title">🔴 必須確認 状況</div>';
+    DATA.staffList.forEach(function(s){
+      if(s.role==='admin') return;
+      var readCount=0;
+      unread.forEach(function(n){ if(DATA.readNotices[s.id]&&DATA.readNotices[s.id][n.id]) readCount++; });
+      var allRead=readCount>=unread.length;
+      h+='<div class="log-item"><div class="log-name">'+s.name+'</div>';
+      h+='<span class="badge '+(allRead?'bread':'bwarn')+'">'+(allRead?'確認済み':'未確認 '+readCount+'/'+unread.length+'件')+'</span></div>';
+    });
+    h+='</div>';
+  }
+  document.getElementById('apanel-log').innerHTML=h;
+}
+
+function renderAdminStaff(){
+  var h='<div style="margin-bottom:10px;"><button class="btn-sm btn-primary" id="btn-add-staff">＋ スタッフ追加</button></div><div class="card">';
+  DATA.staffList.forEach(function(s){
+    var rl=s.role==='admin'?'管理者':s.role==='manager'?'責任者':'スタッフ';
+    var sl=s.store==='both'?'両店舗':s.store==='store1'?'渋谷店':'新宿店';
+    var bc=s.store==='store1'?'bs1':s.store==='store2'?'bs2':'badm';
+    h+='<div class="log-item"><div><div class="log-name">'+s.name+' <span class="badge '+bc+'">'+sl+'</span></div>';
+    h+='<div class="log-detail">ID: '+s.id+' / '+rl+'</div></div>';
+    h+='<div style="display:flex;gap:6px;"><button class="btn-sm" data-edit="'+s.id+'">編集</button>';
+    if(s.id!=='admin') h+='<button class="btn-sm btn-danger" data-del="'+s.id+'">削除</button>';
+    h+='</div></div>';
+  });
+  h+='</div>';
+  document.getElementById('apanel-staff').innerHTML=h;
+  document.getElementById('btn-add-staff').addEventListener('click', openAddStaff);
+  document.querySelectorAll('[data-edit]').forEach(function(btn){ btn.addEventListener('click', function(){ openEditStaff(this.getAttribute('data-edit')); }); });
+  document.querySelectorAll('[data-del]').forEach(function(btn){ btn.addEventListener('click', function(){ deleteStaff(this.getAttribute('data-del')); }); });
+}
+
+function renderAdminNotice(){
+  var h='<div style="margin-bottom:10px;"><button class="btn-sm btn-primary" id="btn-add-notice">＋ お知らせ追加</button></div><div class="card">';
+  DATA.notices.forEach(function(n){
+    h+='<div class="log-item"><div><div class="log-name">'+n.title+'</div>';
+    h+='<div class="log-detail">'+n.date+(n.priority==='high'?' <span class="badge bwarn">重要</span>':'')+'</div></div>';
+    h+='<div style="display:flex;gap:6px;"><button class="btn-sm" data-editn="'+n.id+'">編集</button><button class="btn-sm btn-danger" data-deln="'+n.id+'">削除</button></div></div>';
+  });
+  h+='</div>';
+  document.getElementById('apanel-notice').innerHTML=h;
+  document.getElementById('btn-add-notice').addEventListener('click', openAddNotice);
+  document.querySelectorAll('[data-editn]').forEach(function(btn){ btn.addEventListener('click', function(){ openEditNotice(Number(this.getAttribute('data-editn'))); }); });
+  document.querySelectorAll('[data-deln]').forEach(function(btn){ btn.addEventListener('click', function(){ deleteNotice(Number(this.getAttribute('data-deln'))); }); });
+}
+
+function renderAdminSheets(){
+  var cfg=DATA.sheetsConfig;
+  var h='<div class="card"><div class="card-title">⚙️ Google Sheets API 設定</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.8;">A列=日付, B列=店舗（渋谷/新宿）, C列=スタッフ名, D列=累計Pt, E列=稼働日数</div>';
+  h+='<div style="font-size:13px;margin-bottom:6px;"><strong>スプレッドシートID:</strong> '+(cfg.id||'<span style="color:var(--mu)">未設定</span>')+'</div>';
+  h+='<div style="font-size:13px;margin-bottom:12px;"><strong>シート名:</strong> '+cfg.sheet+'</div>';
+  h+='<button class="btn-sm btn-primary" id="btn-sheets-open">設定を変更</button></div>';
+  h+='<div class="card"><div class="card-title">📊 データ更新</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px;line-height:1.7;">Sheetsから最新データを取得します。<br>APIキー未設定の場合はデモデータが表示されます。</div>';
+  h+='<button class="btn-sm btn-primary" id="btn-fetch">🔄 今すぐ取得</button>';
+  h+='<span id="fetch-status" style="font-size:12px;color:var(--mu);margin-left:10px;"></span></div>';
+  h+='<div class="card"><div class="card-title">📱 PWA・通知設定</div>';
+  h+='<div style="font-size:12px;color:var(--mu);margin-bottom:12px;">ホーム画面に追加するとアプリとして使用できます。</div>';
+  h+='<button class="btn-sm btn-primary" id="btn-push-req">🔔 通知を許可する</button>';
+  h+='<span id="push-status" style="font-size:12px;color:var(--mu);margin-left:10px;"></span></div>';
+  document.getElementById('apanel-sheets').innerHTML=h;
+  document.getElementById('btn-sheets-open').addEventListener('click', openSheetsModal);
+  document.getElementById('btn-fetch').addEventListener('click', fetchSheets);
+  document.getElementById('btn-push-req').addEventListener('click', function(){
+    if(!('Notification' in window)){ document.getElementById('push-status').textContent='このブラウザは非対応です'; return; }
+    Notification.requestPermission().then(function(p){
+      var el=document.getElementById('push-status');
+      if(p==='granted'){ el.textContent='✅ 通知が許可されました'; el.style.color='var(--gn)'; }
+      else { el.textContent='❌ 通知が拒否されました'; el.style.color='var(--rd)'; }
+    });
+  });
+}
+
+// ── STAFF CRUD ──
+function openAddStaff(){
+  editStaffId=null;
+  document.getElementById('ms-title').textContent='スタッフ追加';
+  document.getElementById('ms-id').value=''; document.getElementById('ms-id').disabled=false;
+  document.getElementById('ms-name').value=''; document.getElementById('ms-pw').value='';
+  document.getElementById('ms-store').value='store1'; document.getElementById('ms-role').value='staff';
+  document.getElementById('modal-staff').classList.add('open');
+}
+function openEditStaff(id){
+  editStaffId=id;
+  var s=null; for(var i=0;i<DATA.staffList.length;i++){ if(DATA.staffList[i].id===id){ s=DATA.staffList[i]; break; } }
+  if(!s) return;
+  document.getElementById('ms-title').textContent='スタッフ編集';
+  document.getElementById('ms-id').value=s.id; document.getElementById('ms-id').disabled=true;
+  document.getElementById('ms-name').value=s.name; document.getElementById('ms-pw').value=s.pw;
+  document.getElementById('ms-store').value=s.store; document.getElementById('ms-role').value=s.role;
+  document.getElementById('modal-staff').classList.add('open');
+}
+document.getElementById('ms-save').addEventListener('click', function(){
+  var id=document.getElementById('ms-id').value.trim();
+  var nm=document.getElementById('ms-name').value.trim();
+  var pw=document.getElementById('ms-pw').value;
+  var st=document.getElementById('ms-store').value;
+  var rl=document.getElementById('ms-role').value;
+  if(!id||!nm||!pw){ alert('全項目を入力してください'); return; }
+  if(editStaffId){
+    for(var i=0;i<DATA.staffList.length;i++){ if(DATA.staffList[i].id===editStaffId){ DATA.staffList[i].name=nm; DATA.staffList[i].pw=pw; DATA.staffList[i].store=st; DATA.staffList[i].role=rl; break; } }
+  } else {
+    for(var j=0;j<DATA.staffList.length;j++){ if(DATA.staffList[j].id===id){ alert('このIDは既に存在します'); return; } }
+    DATA.staffList.push({id:id,name:nm,pw:pw,store:st,role:rl});
+  }
+  save(); closeModal('modal-staff'); renderAdminStaff(); showToast('スタッフ情報を保存しました');
+});
+document.getElementById('ms-cancel').addEventListener('click', function(){ closeModal('modal-staff'); });
+function deleteStaff(id){ if(!confirm('このスタッフを削除しますか？')) return; DATA.staffList=DATA.staffList.filter(function(s){ return s.id!==id; }); save(); renderAdminStaff(); showToast('スタッフを削除しました'); }
+
+// ── NOTICE CRUD ──
+function openAddNotice(){
+  editNoticeId=null;
+  document.getElementById('mn-title').textContent='お知らせ追加';
+  document.getElementById('mn-ttl').value=''; document.getElementById('mn-body').value=''; document.getElementById('mn-pri').value='normal';
+  document.getElementById('modal-notice').classList.add('open');
+}
+function openEditNotice(id){
+  editNoticeId=id;
+  var n=null; for(var i=0;i<DATA.notices.length;i++){ if(DATA.notices[i].id===id){ n=DATA.notices[i]; break; } }
+  if(!n) return;
+  document.getElementById('mn-title').textContent='お知らせ編集';
+  document.getElementById('mn-ttl').value=n.title; document.getElementById('mn-body').value=n.body; document.getElementById('mn-pri').value=n.priority;
+  document.getElementById('modal-notice').classList.add('open');
+}
+document.getElementById('mn-save').addEventListener('click', function(){
+  var ttl=document.getElementById('mn-ttl').value.trim();
+  var body=document.getElementById('mn-body').value.trim();
+  var pri=document.getElementById('mn-pri').value;
+  if(!ttl){ alert('タイトルを入力してください'); return; }
+  var dt=todayStr();
+  if(editNoticeId!==null&&editNoticeId!==undefined){
+    for(var i=0;i<DATA.notices.length;i++){ if(DATA.notices[i].id===editNoticeId){ DATA.notices[i].title=ttl; DATA.notices[i].body=body; DATA.notices[i].priority=pri; DATA.notices[i].date=dt; break; } }
+  } else {
+    var newN={id:DATA.noticeCounter++,title:ttl,body:body,priority:pri,date:dt};
+    DATA.notices.unshift(newN);
+    DATA.staffList.forEach(function(s){ if(DATA.readNotices[s.id]) delete DATA.readNotices[s.id][newN.id]; });
+    if(pri==='high') sendPushNotification('新しいお知らせ', ttl);
+  }
+  save(); closeModal('modal-notice'); renderAdminNotice(); renderHome(); updateNotifBadge(); showToast('お知らせを保存しました');
+});
+document.getElementById('mn-cancel').addEventListener('click', function(){ closeModal('modal-notice'); });
+function deleteNotice(id){ if(!confirm('このお知らせを削除しますか？')) return; DATA.notices=DATA.notices.filter(function(n){ return n.id!==id; }); save(); renderAdminNotice(); renderHome(); updateNotifBadge(); showToast('お知らせを削除しました'); }
+
+// ── SHEETS ──
+function openSheetsModal(){
+  document.getElementById('sh-id').value=DATA.sheetsConfig.id;
+  document.getElementById('sh-key').value=DATA.sheetsConfig.key||'';
+  document.getElementById('sh-sheet').value=DATA.sheetsConfig.sheet;
+  document.getElementById('modal-sheets').classList.add('open');
+}
+document.getElementById('sh-save').addEventListener('click', function(){
+  DATA.sheetsConfig.id=document.getElementById('sh-id').value.trim();
+  DATA.sheetsConfig.key=document.getElementById('sh-key').value.trim();
+  DATA.sheetsConfig.sheet=document.getElementById('sh-sheet').value.trim();
+  save(); closeModal('modal-sheets'); showToast('設定を保存しました'); renderAdminSheets();
+});
+document.getElementById('sh-cancel').addEventListener('click', function(){ closeModal('modal-sheets'); });
+function fetchSheets(){
+  var cfg=DATA.sheetsConfig;
+  var el=document.getElementById('fetch-status');
+  if(!cfg.id||!cfg.key){ el.textContent='⚠️ 設定が未完了です'; el.style.color='var(--rd)'; return; }
+  el.textContent='取得中...'; el.style.color='var(--mu)';
+  var url='https://sheets.googleapis.com/v4/spreadsheets/'+cfg.id+'/values/'+encodeURIComponent(cfg.sheet)+'?key='+cfg.key;
+  fetch(url).then(function(r){ return r.json(); }).then(function(json){
+    if(json.error) throw new Error(json.error.message);
+    var rows=(json.values||[]).slice(1);
+    DATA.store1.staff=[]; DATA.store1.totalPt=0; DATA.store1.workDays=0;
+    DATA.store2.staff=[]; DATA.store2.totalPt=0; DATA.store2.workDays=0;
+    rows.forEach(function(r){
+      var pt=parseFloat(r[3])||0, wd=parseInt(r[4])||0;
+      var key=r[1]==='渋谷'?'store1':'store2';
+      DATA[key].totalPt=parseFloat((DATA[key].totalPt+pt).toFixed(3));
+      DATA[key].workDays+=wd;
+      DATA[key].productivity=DATA[key].workDays>0?parseFloat((DATA[key].totalPt/DATA[key].workDays).toFixed(3)):0;
+      var ex=null; for(var i=0;i<DATA[key].staff.length;i++){ if(DATA[key].staff[i].name===r[2]){ ex=DATA[key].staff[i]; break; } }
+      if(ex){ ex.pt=parseFloat((ex.pt+pt).toFixed(3)); ex.workDays+=wd; ex.productivity=ex.workDays>0?parseFloat((ex.pt/ex.workDays).toFixed(3)):0; }
+      else DATA[key].staff.push({name:r[2],pt:pt,workDays:wd,productivity:wd>0?parseFloat((pt/wd).toFixed(3)):0,target:2.0});
+    });
+    save(); renderResults(); renderHome(); renderChart();
+    el.textContent='✅ 取得完了 ('+new Date().toLocaleTimeString('ja-JP')+')'; el.style.color='var(--gn)';
+    showToast('データを更新しました');
+  }).catch(function(e){ el.textContent='❌ '+e.message; el.style.color='var(--rd)'; });
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(function(m){ m.addEventListener('click', function(e){ if(e.target===m) m.classList.remove('open'); }); });
+
+function renderAll(){ renderHome(); renderResults(); renderDocs(); renderManual(); }
+DATA=load();
+document.getElementById('lid').focus();
+
+})();
+</script>
+</body>
+</html>
